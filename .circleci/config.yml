@@ -5,6 +5,7 @@ jobs:
     - image: circleci/golang:1.11
     steps:
     - checkout
+    - run: go get github.com/abiosoft/ishell
     - run: curl -sL https://git.io/goreleaser | bash
 workflows:
   version: 2
