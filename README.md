@@ -15,7 +15,7 @@ To avoid this, Imerologio CLI let's you bootstrap a fully configured Event Sourc
 - Then launch `imerologio-cli` in the extracted folder
 - Enjoy :tada:
 
-DISCLAIMER : This project is a Work in Progress and not be ready to use in production. You can follow the progression [here](https://github.com/Agaetis-IT/imerologio-cli/projects/1) and your contribution is welcome :nerd_face:
+> **DISCLAIMER** : This project is a Work in Progress and not be ready to use in production. You can follow the progression [here](https://github.com/Agaetis-IT/imerologio-cli/projects/1) and your contribution is welcome :nerd_face:
 
 ## Contributing
 To contribute to Imerologio-cli, see [CONTRIBUTING.md](CONTRIBUTING.md)
