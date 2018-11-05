@@ -117,5 +117,5 @@ func getAppPath(c *ishell.Context, appName string) string {
 }
 
 func generateApp(appName string, appPath string) {
-	os.Mkdir(appPath, os.ModeDir)
+	os.Mkdir(appPath, 0700)
 }
