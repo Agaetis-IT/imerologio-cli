@@ -9,6 +9,8 @@ Imerologio (ημερολόγιο : Greek for [ship's log](https://en.wikipedia.o
   <img src="example.gif" />
 </p>
 
+> **DISCLAIMER** : This project is a Work in Progress and not be ready to use in production. You can follow the progression [here](https://github.com/Agaetis-IT/imerologio-cli/projects/1) and your contribution is welcome :nerd_face:
+
 ## Why ?
 Starting new projects with Event Sourcing architecture usually require some time to bootstrap all the components and is often done by copy/paste of existing projects with all the drawbacks we know.   
 
@@ -18,8 +20,6 @@ To avoid this, Imerologio CLI let's you bootstrap a fully configured Event Sourc
 - Download the  [latest version](https://github.com/Agaetis-IT/imerologio-cli/releases/latest) of imerologio-cli (Go binary for macOs and Linux. Windows soon)
 - Then launch `imerologio-cli` in the extracted folder
 - Enjoy :tada:
-
-> **DISCLAIMER** : This project is a Work in Progress and not be ready to use in production. You can follow the progression [here](https://github.com/Agaetis-IT/imerologio-cli/projects/1) and your contribution is welcome :nerd_face:
 
 ## Contributing
 To contribute to Imerologio-cli, see [CONTRIBUTING.md](CONTRIBUTING.md)
