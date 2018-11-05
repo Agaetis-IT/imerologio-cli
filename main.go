@@ -57,10 +57,11 @@ func imerologio(c *ishell.Context) {
 			break
 		} else if strings.ToLower(goGeneration) == "y" || strings.ToLower(goGeneration) == "yes" {
 			c.ProgressBar().Start()
-			for i := 0; i < 101; i++ {
+			for i := 0; i <= 101; {
 				c.ProgressBar().Suffix(fmt.Sprint(" ", i, "%"))
-				c.ProgressBar().Progress(i)
 				generateApp(appName, appPath)
+				i += 100
+				c.ProgressBar().Progress(i)
 			}
 			c.ProgressBar().Stop()
 			c.Println("")
