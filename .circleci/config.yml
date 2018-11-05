@@ -6,6 +6,7 @@ jobs:
     steps:
     - checkout
     - run: go get github.com/abiosoft/ishell
+    - run: go get github.com/fatih/color
     - run: curl -sL https://git.io/goreleaser | bash
 workflows:
   version: 2
