@@ -1,5 +1,5 @@
 # Imerologio CLI
-Imerologio (ημερολόγιο : Greek for [ship's log](https://en.wikipedia.org/wiki/Logbook)) is an open source project for bootstraping applications with Event Sourcing at heart and Kubernetes ready.  
+Imerologio (ημερολόγιο : Greek for [ship's log](https://en.wikipedia.org/wiki/Logbook)) is an open source project for bootstraping opiniated applications with Event Sourcing at heart and Kubernetes ready.  
 
 [![GitHub release](https://img.shields.io/github/release/Agaetis-IT/imerologio-cli.svg)](https://github.com/Agaetis-IT/imerologio-cli/releases/latest)
 [![GitHub license](https://img.shields.io/github/license/Agaetis-IT/imerologio-cli.svg)](https://github.com/Agaetis-IT/imerologio-cli/blob/master/LICENSE)
