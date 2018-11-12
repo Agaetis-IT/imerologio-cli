@@ -3,7 +3,7 @@ Welcome to Imerologio CLI project !
 
 ## About development
 ### Go 
-Imerologio CLI is a Go application so make sure your have a development environment with Go 1.2+.  
+Imerologio CLI is a Go application so make sure you have a development environment with Go 1.2+.  
 [See the install instructions for Go](http://golang.org/doc/install.html).
 
 ### Dependencies
