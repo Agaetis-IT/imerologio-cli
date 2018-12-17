@@ -53,7 +53,7 @@ func imerologio(c *ishell.Context) {
 		c.Print(infoColor("Launch generation ? [y/n]: "))
 		goGeneration := c.ReadLine()
 		if strings.ToLower(goGeneration) == "n" || strings.ToLower(goGeneration) == "no" {
-			c.Print("Ok, I've done nothing. See you soon 👋")
+			c.Println("Ok, I've done nothing. See you soon 👋")
 			break
 		} else if strings.ToLower(goGeneration) == "y" || strings.ToLower(goGeneration) == "yes" {
 			c.ProgressBar().Start()
@@ -65,7 +65,7 @@ func imerologio(c *ishell.Context) {
 			}
 			c.ProgressBar().Stop()
 			c.Println("")
-			c.Print("Happy coding 🎉")
+			c.Println("Happy coding 🎉")
 			break
 		}
 		c.Println("Only y, yes, n or no are allowed")
