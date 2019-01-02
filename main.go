@@ -1,102 +1,94 @@
 package main
 
 import (
+	"errors"
 	"fmt"
-	"github.com/abiosoft/ishell"
 	"github.com/fatih/color"
+	"gopkg.in/AlecAivazis/survey.v1"
+	"gopkg.in/cheggaaa/pb.v1"
 	"log"
 	"os"
 	"os/user"
 	"path/filepath"
 	"strings"
+	"time"
 )
 
 var promptColor = color.New(color.FgCyan).SprintfFunc()
-var errorColor = color.New(color.FgRed).SprintfFunc()
 var infoColor = color.New(color.FgMagenta).SprintfFunc()
 
+type Answers struct {
+	Name string
+	Path string
+}
+
 func main() {
-	// create new shell.
-	// by default, new shell includes 'exit', 'help' and 'clear' commands.
-	shell := ishell.New()
+	fmt.Println(infoColor("Imerologio CLI helps you bootstrap your event sourcing app easily ✨"))
 
-	// display welcome info.
+	answers := Answers{}
 
-	shell.Println(infoColor("Imerologio CLI helps you bootstrap your event sourcing app easily ✨"))
+	var err = survey.AskOne(&survey.Input{Message: "App name:"}, &answers.Name, survey.Required)
+	if err != nil {
+		fmt.Println(err.Error())
+		return
+	}
 
-	// register a function for "greet" command.
-	shell.AddCmd(&ishell.Cmd{
-		Name: "imerologio",
-		Help: "Create a new imerologio application",
-		Func: imerologio,
+	questions := []*survey.Question{
+		{
+			Name:      "path",
+			Prompt:    &survey.Input{Message: "App path [" + suggestAppPath(answers.Name) + "]:"},
+			Validate:  validateAppPath(answers.Name),
+			Transform: transformAppPath(answers.Name),
+		},
+	}
+	err = survey.Ask(questions, &answers)
+	if err != nil {
+		fmt.Println(err.Error())
+		return
+	}
+
+	showRecap(answers)
+
+	var launchGeneration = "n"
+	err = survey.AskOne(&survey.Input{Message: "Launch generation [y/n]"}, &launchGeneration, func(val interface{}) error {
+		response := strings.ToLower(val.(string))
+		if response != "n" && response != "no" && response != "y" && response != "yes" {
+			return errors.New("Only y, yes, n or no are allowed")
+		}
+		return nil
 	})
-
-	// when started with "exit" as first argument, assume non-interactive execution
-	shell.Process("imerologio")
-}
-
-func imerologio(c *ishell.Context) {
-	c.ShowPrompt(false)
-
-	appName := getAppName(c)
-	appPath := getAppPath(c, appName)
-
-	c.Println("")
-	c.Println(infoColor("Ok, let's recap"))
-	c.Println("----------------")
-	c.Print(promptColor("App name : "))
-	c.Println(appName)
-	c.Print(promptColor("App path : "))
-	c.Println(appPath)
-	c.Println("----------------")
-	for {
-		c.Print(infoColor("Launch generation ? [y/n]: "))
-		goGeneration := c.ReadLine()
-		if strings.ToLower(goGeneration) == "n" || strings.ToLower(goGeneration) == "no" {
-			c.Println("Ok, I've done nothing. See you soon 👋")
-			break
-		} else if strings.ToLower(goGeneration) == "y" || strings.ToLower(goGeneration) == "yes" {
-			c.ProgressBar().Start()
-			for i := 0; i <= 101; {
-				c.ProgressBar().Suffix(fmt.Sprint(" ", i, "%"))
-				generateApp(appName, appPath)
-				i += 100
-				c.ProgressBar().Progress(i)
-			}
-			c.ProgressBar().Stop()
-			c.Println("")
-			c.Println("Happy coding 🎉")
-			break
+	if err != nil {
+		fmt.Println(err.Error())
+		return
+	}
+	if strings.ToLower(launchGeneration) == "n" || strings.ToLower(launchGeneration) == "no" {
+		fmt.Println("Ok, I've done nothing. See you soon 👋")
+	} else {
+		count := 5000
+		bar := pb.StartNew(count)
+		bar.ShowCounters = false
+		for i := 0; i < count; i++ {
+			bar.Increment()
+			time.Sleep(time.Millisecond)
 		}
-		c.Println("Only y, yes, n or no are allowed")
+		generateApp(answers)
+		bar.FinishPrint(infoColor("Happy coding 🎉"))
 	}
 }
 
-func getAppName(c *ishell.Context) string {
-	for {
-		c.Print(promptColor("App name: "))
-		result := c.ReadLine()
-		if result != "" {
-			return result
-		}
-		c.Println(errorColor("App name must be a non empty string"))
-	}
-}
-
-func getAppPath(c *ishell.Context, appName string) string {
+func suggestAppPath(appName string) string {
 	usr, err := user.Current()
 	if err != nil {
 		log.Fatal("Error while retrieving user's home directory")
 	}
-	suggestedPath := filepath.Join(usr.HomeDir, appName)
+	return filepath.Join(usr.HomeDir, appName)
+}
 
-	for {
-		c.Print(promptColor("Path [%s]: ", suggestedPath))
-		var appPath = c.ReadLine()
-
-		// user chose the suggested path
+func validateAppPath(appName string) func(interface{}) error {
+	return func(appPathValue interface{}) error {
+		appPath := appPathValue.(string)
 		if appPath == "" {
-			return suggestedPath
+			return nil
 		}
 
 		basePath := filepath.Base(appPath)
@@ -108,15 +100,43 @@ func getAppPath(c *ishell.Context, appName string) string {
 		// check that parent folder exists and that app folder does not exist to erase nothing
 		parentPath := filepath.Dir(appPath)
 		if _, err := os.Stat(parentPath); os.IsNotExist(err) {
-			c.Println(errorColor("The parent folder must exist and %s does not", parentPath))
-		} else if _, err := os.Stat(appPath); !os.IsNotExist(err) {
-			c.Println(errorColor("The given folder must be empty and %s is not", appPath))
-		} else {
-			return appPath
+			return errors.New("The parent folder must exist and " + parentPath + " does not")
+		} else if _, err := os.Stat(appPath); os.IsExist(err) {
+			return errors.New("The given folder must be empty and " + appPath + " is not")
 		}
+
+		return nil
 	}
 }
 
-func generateApp(appName string, appPath string) {
-	os.Mkdir(appPath, 0700)
+func transformAppPath(appName string) func(interface{}) interface{} {
+	return func(appPathValue interface{}) interface{} {
+		appPath := appPathValue.(string)
+		if appPath == "" {
+			return suggestAppPath(appName)
+		}
+
+		basePath := filepath.Base(appPath)
+		// if user omitted the app name, let add it for him
+		if basePath != appName {
+			appPath = filepath.Join(appPath, appName)
+		}
+
+		return appPath
+	}
+}
+
+func showRecap(answers Answers) {
+	fmt.Println("")
+	fmt.Println(infoColor("Ok, let's recap"))
+	fmt.Println("----------------")
+	fmt.Print(promptColor("App name: "))
+	fmt.Println(answers.Name)
+	fmt.Print(promptColor("App path: "))
+	fmt.Println(answers.Path)
+	fmt.Println("----------------")
+}
+
+func generateApp(answers Answers) {
+	os.Mkdir(answers.Path, 0700)
 }
