@@ -98,8 +98,8 @@ func validateAppPath(appName string) func(interface{}) error {
 		parentPath := filepath.Dir(appPath)
 		if _, err := os.Stat(parentPath); os.IsNotExist(err) {
 			return errors.New("The parent folder must exist and " + parentPath + " does not")
-		} else if _, err := os.Stat(appPath); os.IsExist(err) {
-			return errors.New("The given folder must be empty and " + appPath + " is not")
+		} else if _, err := os.Stat(appPath); !os.IsNotExist(err) {
+			return errors.New("The given folder must not exist and " + appPath + " does")
 		}
 
 		return nil
@@ -134,6 +134,6 @@ func showRecap(answers Answers) {
 	fmt.Println("----------------")
 }
 
-func generateApp(answers Answers) {
-	os.Mkdir(answers.Path, 0700)
+func generateApp(answers Answers) error {
+	return os.Mkdir(answers.Path, 0750)
 }
