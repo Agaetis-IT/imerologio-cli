@@ -15,6 +15,7 @@ import (
 )
 
 var promptColor = color.New(color.FgCyan).SprintfFunc()
+var errorColor = color.New(color.FgRed).SprintfFunc()
 var infoColor = color.New(color.FgMagenta).SprintfFunc()
 
 type Answers struct {
@@ -29,7 +30,7 @@ func main() {
 
 	var err = survey.AskOne(&survey.Input{Message: "App name:"}, &answers.Name, survey.Required)
 	if err != nil {
-		fmt.Println(err.Error())
+		log.Fatal(errorColor(err.Error()))
 		return
 	}
 
@@ -43,35 +44,40 @@ func main() {
 	}
 	err = survey.Ask(questions, &answers)
 	if err != nil {
-		fmt.Println(err.Error())
+		log.Fatal(errorColor(err.Error()))
 		return
 	}
 
 	showRecap(answers)
 
 	var launchGeneration = "n"
-	err = survey.AskOne(&survey.Input{Message: "Launch generation [y/n]"}, &launchGeneration, func(val interface{}) error {
-		response := strings.ToLower(val.(string))
-		if response != "n" && response != "no" && response != "y" && response != "yes" {
-			return errors.New("Only y, yes, n or no are allowed")
-		}
-		return nil
-	})
+	err = survey.AskOne(&survey.Input{Message: "Launch generation [y/n]"}, &launchGeneration,
+		func(val interface{}) error {
+			response := strings.ToLower(val.(string))
+			if response != "n" && response != "no" && response != "y" && response != "yes" {
+				return errors.New("Only y, yes, n or no are allowed")
+			}
+			return nil
+		})
 	if err != nil {
-		fmt.Println(err.Error())
+		log.Fatal(errorColor(err.Error()))
 		return
 	}
 	if strings.ToLower(launchGeneration) == "n" || strings.ToLower(launchGeneration) == "no" {
-		fmt.Println("Ok, I've done nothing. See you soon 👋")
+		fmt.Println(infoColor("Ok, I've done nothing. See you soon 👋"))
 	} else {
-		count := 5000
+		count := 2000
 		bar := pb.StartNew(count)
 		bar.ShowCounters = false
 		for i := 0; i < count; i++ {
 			bar.Increment()
 			time.Sleep(time.Millisecond)
 		}
-		generateApp(answers)
+		err := generateApp(answers)
+		if err != nil {
+			log.Fatal(errorColor(err.Error()))
+			return
+		}
 		bar.FinishPrint(infoColor("Happy coding 🎉"))
 	}
 }
@@ -79,23 +85,14 @@ func main() {
 func suggestAppPath(appName string) string {
 	usr, err := user.Current()
 	if err != nil {
-		log.Fatal("Error while retrieving user's home directory")
+		log.Fatal(errorColor("Error while retrieving user's home directory"))
 	}
 	return filepath.Join(usr.HomeDir, appName)
 }
 
 func validateAppPath(appName string) func(interface{}) error {
 	return func(appPathValue interface{}) error {
-		appPath := appPathValue.(string)
-		if appPath == "" {
-			return nil
-		}
-
-		basePath := filepath.Base(appPath)
-		// if user omitted the app name, let add it for him
-		if basePath != appName {
-			appPath = filepath.Join(appPath, appName)
-		}
+		appPath := transformAppPath(appName)(appPathValue).(string)
 
 		// check that parent folder exists and that app folder does not exist to erase nothing
 		parentPath := filepath.Dir(appPath)
