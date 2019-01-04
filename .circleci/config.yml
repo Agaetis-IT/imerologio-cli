@@ -2,19 +2,19 @@ version: 2
 jobs:
   release:
     docker:
-    - image: circleci/golang:1.11
+      - image: circleci/golang:1.11
     steps:
-    - checkout
-    - run: go get github.com/abiosoft/ishell
-    - run: go get github.com/fatih/color
-    - run: curl -sL https://git.io/goreleaser | bash
+      - checkout
+      - run: go get gopkg.in/AlecAivazis/survey.v1
+      - run: go get github.com/fatih/color
+      - run: curl -sL https://git.io/goreleaser | bash
 workflows:
   version: 2
   release:
     jobs:
-    - release:
-        filters:
-          branches:
-            ignore: /.*/
-          tags:
-            only: /v[0-9]+(\.[0-9]+)*(-.*)*/
+      - release:
+          filters:
+            branches:
+              ignore: /.*/
+            tags:
+              only: /v[0-9]+(\.[0-9]+)*(-.*)*/
