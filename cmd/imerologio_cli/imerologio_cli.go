@@ -11,7 +11,6 @@ func main() {
 	PrintlnInfo("Imerologio CLI helps you bootstrap your event sourcing app easily ✨")
 
 	answers := Answers{}
-	//
 	var err = AskAppName(&answers)
 	if err != nil {
 		PrintlnError(err.Error())
@@ -26,13 +25,13 @@ func main() {
 
 	showRecap(answers)
 
-	var launchGeneration = false
-	err = AskLaunchGeneration(&launchGeneration)
+	var beginGeneration = false
+	err = AskBeginGeneration(&beginGeneration)
 	if err != nil {
 		PrintlnError(err.Error())
 		return
 	}
-	if !launchGeneration {
+	if !beginGeneration {
 		PrintlnInfo("Ok, I've done nothing. See you soon 👋")
 	} else {
 		err = GenerateApp(answers)
@@ -40,7 +39,7 @@ func main() {
 			PrintlnError(err.Error())
 			return
 		}
-		PrintlnInfo("Done ! Happy coding 🎉")
+		PrintlnInfo("Done! Happy coding 🎉")
 	}
 }
 
