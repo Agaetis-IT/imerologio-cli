@@ -5,8 +5,8 @@ import (
 )
 
 func AskBeginGeneration(launchGeneration *bool) error {
-	var answer = false
-	var err = survey.AskOne(&survey.Confirm{Message: "Begin generation?"}, &answer, nil)
+	answer := false
+	err := survey.AskOne(&survey.Confirm{Message: "Begin generation?"}, &answer, nil)
 	if err != nil {
 		return err
 	}
