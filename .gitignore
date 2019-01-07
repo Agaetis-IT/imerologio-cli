@@ -15,4 +15,4 @@ imerologio-cli
 
 # IntelliJ
 .idea/
-
+*.iml
