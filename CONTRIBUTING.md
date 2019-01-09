@@ -22,4 +22,4 @@ Simply run `./imerologio-cli` once build finished.
 
 ## About releasing
 This product is built using [goreleaser](https://goreleaser.com/), take a look at the config at [.goreleaser.yml](.goreleaser.yml).  
-An automated build is launched on [Circle CI](https://circleci.com/gh/Agaetis-IT/imerologio-cli) each time a tag is push on this repository.
+Push a tag with pattern like `v0.1.4` and an automated build is launched on [Circle CI](https://circleci.com/gh/Agaetis-IT/imerologio-cli).
