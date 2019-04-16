@@ -1,6 +1,7 @@
 package ime_types
 
 type Answers struct {
-	Name string
-	Path string
+	Name           string
+	Path           string
+	KafkaNamespace string
 }

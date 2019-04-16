@@ -23,6 +23,12 @@ func main() {
 		return
 	}
 
+	err = AskKafkaNamespace(&answers)
+	if err != nil {
+		PrintlnError(err.Error())
+		return
+	}
+
 	showRecap(answers)
 
 	beginGeneration := false
@@ -44,11 +50,15 @@ func main() {
 }
 
 func showRecap(answers Answers) {
-	PrintlnInfo("----------------")
+	PrintlnInfo("")
 	PrintlnInfo("Ok, let's recap")
+	PrintlnInfo("-- General")
 	Print("App name: ")
 	PrintlnPrompt(answers.Name)
 	Print("App path: ")
 	PrintlnPrompt(answers.Path)
-	PrintlnInfo("----------------")
+	PrintlnInfo("-- Kafka")
+	Print("Namespace: ")
+	PrintlnPrompt(answers.KafkaNamespace)
+	PrintlnInfo("")
 }
