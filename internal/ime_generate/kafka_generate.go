@@ -1,7 +1,6 @@
 package ime_generate
 
 import (
-	. "../../pkg/ime_types"
 	. "../../pkg/ime_utils"
 	"gopkg.in/cheggaaa/pb.v1"
 	"io"
@@ -11,35 +10,8 @@ import (
 
 const strimziUrl = "https://github.com/strimzi/strimzi-kafka-operator/releases/download/0.11.1/strimzi-0.11.1.zip"
 
-func GenerateApp(answers Answers) error {
-	count := 10
-	bar := pb.StartNew(count)
-	bar.ShowCounters = false
-
-	err := generateWorkspace(bar, answers.Path)
-	if err != nil {
-		return err
-	}
-
-	err = generateKafka(bar, answers)
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func generateWorkspace(bar *pb.ProgressBar, path string) error {
-	mkdirSucceeded := os.Mkdir(path, 0750)
-	if mkdirSucceeded != nil {
-		return mkdirSucceeded
-	}
-	bar.Increment()
-	return nil
-}
-
-func generateKafka(bar *pb.ProgressBar, answers Answers) error {
-	err := getStrimzi(bar, answers.Path)
+func GenerateKafka(bar *pb.ProgressBar, workspacePath string) error {
+	err := getStrimzi(bar, workspacePath)
 	if err != nil {
 		return err
 	}
