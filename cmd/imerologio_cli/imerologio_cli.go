@@ -74,7 +74,7 @@ func generateApp(answers Answers) error {
 		return err
 	}
 
-	err = GenerateKafka(bar, answers.Path)
+	err = GenerateKafka(bar, answers.Path, answers.KafkaNamespace)
 	if err != nil {
 		return err
 	}
