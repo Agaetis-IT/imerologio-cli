@@ -1,6 +1,7 @@
 package ime_generate
 
 import (
+	. "../../pkg/ime_types"
 	. "../../pkg/ime_utils"
 	"gopkg.in/cheggaaa/pb.v1"
 	"io"
@@ -8,20 +9,27 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
-	"strings"
+	"strconv"
 )
 
 const STRIMZI_VERSION = "0.11.1"
 const STRIMZI_URL = "https://github.com/strimzi/strimzi-kafka-operator/releases/download/" + STRIMZI_VERSION + "/strimzi-" + STRIMZI_VERSION + ".zip"
 
-func GenerateKafka(bar *pb.ProgressBar, workspacePath string, namespace string) error {
-	strimziPath := workspacePath + "/event-store"
-	err := getStrimzi(bar, workspacePath, strimziPath)
+func GenerateKafka(bar *pb.ProgressBar, answers Answers) error {
+	workspacePath := answers.Path
+	eventStorePath := workspacePath + "/event-store"
+	strimziPath := eventStorePath + "/strimzi-" + STRIMZI_VERSION
+	err := getStrimzi(bar, workspacePath, eventStorePath)
 	if err != nil {
 		return err
 	}
 
-	err = customizeStrimziClusterRole(bar, strimziPath+"/strimzi-"+STRIMZI_VERSION, namespace)
+	err = customizeClusterRole(bar, strimziPath, answers.KafkaOperatorNamespace)
+	if err != nil {
+		return err
+	}
+
+	err = customizeCluster(bar, strimziPath, answers.KafkaClusterName)
 	if err != nil {
 		return err
 	}
@@ -29,7 +37,11 @@ func GenerateKafka(bar *pb.ProgressBar, workspacePath string, namespace string) 
 	// TODO
 	// customizeStrimziClusterRoleTopic
 	// customizeStrimziClusterRoleUser
-	// write shell that install Strimzi in a cluster
+
+	err = initializeDeploymentScript(bar, eventStorePath, strimziPath, answers)
+	if err != nil {
+		return err
+	}
 
 	return nil
 }
@@ -62,11 +74,22 @@ func getStrimzi(bar *pb.ProgressBar, workspacePath string, strimziPath string) e
 
 	// Extract zip archive
 	_, err = Unzip(strimziZipPath, strimziPath)
+	if err != nil {
+		return err
+	}
 	bar.Increment()
-	return err
+
+	// Remove zip archive
+	err = os.Remove(strimziZipPath)
+	if err != nil {
+		return err
+	}
+	bar.Increment()
+
+	return nil
 }
 
-func customizeStrimziClusterRole(bar *pb.ProgressBar, strimziPath string, namespace string) error {
+func customizeClusterRole(bar *pb.ProgressBar, strimziPath string, namespace string) error {
 	err := filepath.Walk(strimziPath+"/install/cluster-operator", replaceNamespaceInRoleBindings(namespace, bar))
 	if err != nil {
 		return err
@@ -92,14 +115,7 @@ func replaceNamespaceInRoleBindings(namespace string, bar *pb.ProgressBar) func(
 		}
 
 		if matched {
-			read, err := ioutil.ReadFile(path)
-			if err != nil {
-				return err
-			}
-
-			newContents := strings.Replace(string(read), "namespace: myproject", "namespace: "+namespace, -1)
-
-			err = ioutil.WriteFile(path, []byte(newContents), 0)
+			err = ReplaceInFile(path, "namespace: myproject", "namespace: "+namespace)
 			if err != nil {
 				return nil
 			}
@@ -108,4 +124,80 @@ func replaceNamespaceInRoleBindings(namespace string, bar *pb.ProgressBar) func(
 
 		return nil
 	}
+}
+
+func customizeCluster(bar *pb.ProgressBar, strimziPath string, clusterName string) error {
+	err := filepath.Walk(strimziPath+"/examples/kafka", replaceClusterNameInKafkaExamples(clusterName, bar))
+
+	if err != nil {
+		return err
+	}
+	bar.Increment()
+	return nil
+}
+
+func replaceClusterNameInKafkaExamples(clusterName string, bar *pb.ProgressBar) func(string, os.FileInfo, error) error {
+	return func(path string, fi os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+
+		if !!fi.IsDir() {
+			return nil
+		}
+
+		matched, err := filepath.Match("*.yaml", fi.Name())
+
+		if err != nil {
+			return err
+		}
+
+		if matched {
+			err = ReplaceInFile(path, "my-cluster", clusterName)
+			if err != nil {
+				return nil
+			}
+		}
+		bar.Increment()
+
+		return nil
+	}
+}
+
+func initializeDeploymentScript(bar *pb.ProgressBar, eventStorePath string, strimziPath string, answers Answers) error {
+	scriptName := eventStorePath + "/deploy_event_store.sh"
+	script := "#!/bin/bash\n\n"
+
+	script += "# Install Cluster operator to expose Kafka cluster resources\n"
+	script += "kubectl apply -f " + strimziPath + "/install/cluster-operator -n " + answers.KafkaOperatorNamespace + "\n\n"
+
+	if answers.KafkaClusterPersistenceEnabled {
+		script += "# Install Kafka cluster with persistence\n"
+		script += "kubectl apply -f " + strimziPath + "/examples/kafka/kafka-persistent.yaml -n " + answers.KafkaClusterNamespace + "\n\n"
+	} else {
+		script += "# Install Kafka cluster without persistence\n"
+		script += "kubectl apply -f " + strimziPath + "/examples/kafka/kafka-ephemeral.yaml -n " + answers.KafkaClusterNamespace + "\n\n"
+	}
+
+	err := ioutil.WriteFile(scriptName, []byte(script), 0700)
+	if err != nil {
+		return err
+	}
+	bar.Increment()
+
+	return nil
+}
+
+func RecapKafka(answers Answers) {
+	PrintlnInfo("-- Kafka")
+	PrintlnInfo("--- Operator")
+	Print("Namespace: ")
+	PrintlnPrompt(answers.KafkaOperatorNamespace)
+	PrintlnInfo("--- Cluster")
+	Print("Name: ")
+	PrintlnPrompt(answers.KafkaClusterName)
+	Print("Namespace: ")
+	PrintlnPrompt(answers.KafkaClusterNamespace)
+	Print("Persistence: ")
+	PrintlnPrompt(strconv.FormatBool(answers.KafkaClusterPersistenceEnabled))
 }

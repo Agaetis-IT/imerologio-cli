@@ -53,14 +53,8 @@ func main() {
 func showRecap(answers Answers) {
 	PrintlnInfo("")
 	PrintlnInfo("Ok, let's recap")
-	PrintlnInfo("-- General")
-	Print("App name: ")
-	PrintlnPrompt(answers.Name)
-	Print("App path: ")
-	PrintlnPrompt(answers.Path)
-	PrintlnInfo("-- Kafka")
-	Print("Namespace: ")
-	PrintlnPrompt(answers.KafkaNamespace)
+	RecapWorkspace(answers)
+	RecapKafka(answers)
 	PrintlnInfo("")
 }
 
@@ -74,7 +68,7 @@ func generateApp(answers Answers) error {
 		return err
 	}
 
-	err = GenerateKafka(bar, answers.Path, answers.KafkaNamespace)
+	err = GenerateKafka(bar, answers)
 	if err != nil {
 		return err
 	}
