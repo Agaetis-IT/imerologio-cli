@@ -9,6 +9,10 @@ func Print(message string) {
 	fmt.Print(message)
 }
 
+func Println(message string) {
+	fmt.Println(message)
+}
+
 func PrintlnPrompt(message string) {
 	promptColor := color.New(color.FgCyan).SprintfFunc()
 	fmt.Println(promptColor(message))

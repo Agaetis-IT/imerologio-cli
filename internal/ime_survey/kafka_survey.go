@@ -26,6 +26,10 @@ func AskKafkaNamespace(answers *Answers) error {
 			Name:   "KafkaClusterPersistenceEnabled",
 			Prompt: &survey.Confirm{Message: "Kafka Cluster - enable persistence ?"},
 		},
+		{
+			Name:   "KafkaTopics",
+			Prompt: &survey.Input{Message: "Kafka Topics - topics separated by comma (optional):"},
+		},
 	}
 	return survey.Ask(questions, answers)
 }

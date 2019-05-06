@@ -34,9 +34,13 @@ func GenerateKafka(bar *pb.ProgressBar, answers Answers) error {
 		return err
 	}
 
-	// TODO
-	// customizeStrimziClusterRoleTopic
-	// customizeStrimziClusterRoleUser
+	topics := getTopics(answers.KafkaTopics)
+	for _, topic := range topics {
+		err = customizeTopic(bar, strimziPath, topic, answers.KafkaClusterName)
+		if err != nil {
+			return err
+		}
+	}
 
 	err = initializeDeploymentScript(bar, eventStorePath, strimziPath, answers)
 	if err != nil {
@@ -164,19 +168,49 @@ func replaceClusterNameInKafkaExamples(clusterName string, bar *pb.ProgressBar) 
 	}
 }
 
+func customizeTopic(bar *pb.ProgressBar, strimziPath string, topic string, clusterName string) error {
+	err := CopyFile(strimziPath+"/examples/topic/kafka-topic.yaml", strimziPath+"/examples/topic/kafka-topic-"+topic+".yaml")
+	if err != nil {
+		return err
+	}
+	bar.Increment()
+
+	err = ReplaceInFile(strimziPath+"/examples/topic/kafka-topic-"+topic+".yaml", "my-topic", topic)
+	if err != nil {
+		return err
+	}
+	bar.Increment()
+
+	err = ReplaceInFile(strimziPath+"/examples/topic/kafka-topic-"+topic+".yaml", "my-cluster", clusterName)
+	if err != nil {
+		return err
+	}
+	bar.Increment()
+
+	return nil
+}
+
 func initializeDeploymentScript(bar *pb.ProgressBar, eventStorePath string, strimziPath string, answers Answers) error {
 	scriptName := eventStorePath + "/deploy_event_store.sh"
 	script := "#!/bin/bash\n\n"
 
-	script += "# Install Cluster operator to expose Kafka cluster resources\n"
+	script += "# Install cluster operator to expose Kafka cluster resources\n"
 	script += "kubectl apply -f " + strimziPath + "/install/cluster-operator -n " + answers.KafkaOperatorNamespace + "\n\n"
 
 	if answers.KafkaClusterPersistenceEnabled {
-		script += "# Install Kafka cluster with persistence\n"
+		script += "# Apply cluster with persistence\n"
 		script += "kubectl apply -f " + strimziPath + "/examples/kafka/kafka-persistent.yaml -n " + answers.KafkaClusterNamespace + "\n\n"
 	} else {
-		script += "# Install Kafka cluster without persistence\n"
+		script += "# Apply cluster without persistence\n"
 		script += "kubectl apply -f " + strimziPath + "/examples/kafka/kafka-ephemeral.yaml -n " + answers.KafkaClusterNamespace + "\n\n"
+	}
+
+	topics := getTopics(answers.KafkaTopics)
+	if len(topics) > 0 {
+		script += "# Apply topics\n"
+	}
+	for _, topic := range topics {
+		script += "kubectl apply -f " + strimziPath + "/examples/topic/kafka-topic-" + topic + ".yaml\n"
 	}
 
 	err := ioutil.WriteFile(scriptName, []byte(script), 0700)
@@ -200,4 +234,17 @@ func RecapKafka(answers Answers) {
 	PrintlnPrompt(answers.KafkaClusterNamespace)
 	Print("Persistence: ")
 	PrintlnPrompt(strconv.FormatBool(answers.KafkaClusterPersistenceEnabled))
+	topics := getTopics(answers.KafkaTopics)
+	if len(topics) > 0 {
+		Println("Topics: ")
+		for _, topic := range topics {
+			PrintlnPrompt("  - " + topic)
+		}
+	} else {
+		Println("Topics: no topics")
+	}
+}
+
+func getTopics(topicsAsString string) []string {
+	return Split(topicsAsString, ',')
 }

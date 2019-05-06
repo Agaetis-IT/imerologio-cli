@@ -7,4 +7,5 @@ type Answers struct {
 	KafkaClusterName               string
 	KafkaClusterNamespace          string
 	KafkaClusterPersistenceEnabled bool
+	KafkaTopics                    string
 }
