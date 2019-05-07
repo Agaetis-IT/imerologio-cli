@@ -192,7 +192,8 @@ func customizeTopic(bar *pb.ProgressBar, strimziPath string, topic string, clust
 
 func initializeDeploymentScript(bar *pb.ProgressBar, eventStorePath string, strimziPath string, answers Answers) error {
 	scriptName := eventStorePath + "/deploy_event_store.sh"
-	script := "#!/bin/bash\n\n"
+	script := "#!/bin/bash\n"
+	script += "set -xe\n\n"
 
 	script += "# Install cluster operator to expose Kafka cluster resources\n"
 	script += "kubectl apply -f " + strimziPath + "/install/cluster-operator -n " + answers.KafkaOperatorNamespace + "\n\n"
