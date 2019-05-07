@@ -30,6 +30,11 @@ func main() {
 		return
 	}
 
+	err = ime_survey.AskSpringBoot(&answers)
+	if err != nil {
+		ime_utils.PrintlnError(err.Error())
+		return
+	}
 	showRecap(answers)
 
 	beginGeneration := false
@@ -69,6 +74,11 @@ func generateApp(answers ime_types.Answers) error {
 	}
 
 	err = ime_generate.GenerateKafka(bar, answers)
+	if err != nil {
+		return err
+	}
+
+	err = ime_generate.GenerateSpringBoot(bar, answers)
 	if err != nil {
 		return err
 	}
