@@ -5,6 +5,7 @@ import (
 	. "../../internal/ime_survey"
 	. "../../pkg/ime_types"
 	. "../../pkg/ime_utils"
+	"gopkg.in/cheggaaa/pb.v1"
 )
 
 func main() {
@@ -23,6 +24,12 @@ func main() {
 		return
 	}
 
+	err = AskKafka(&answers)
+	if err != nil {
+		PrintlnError(err.Error())
+		return
+	}
+
 	showRecap(answers)
 
 	beginGeneration := false
@@ -34,7 +41,7 @@ func main() {
 	if !beginGeneration {
 		PrintlnInfo("Ok, I've done nothing. See you soon 👋")
 	} else {
-		err = GenerateApp(answers)
+		err = generateApp(answers)
 		if err != nil {
 			PrintlnError(err.Error())
 			return
@@ -44,11 +51,27 @@ func main() {
 }
 
 func showRecap(answers Answers) {
-	PrintlnInfo("----------------")
+	PrintlnInfo("")
 	PrintlnInfo("Ok, let's recap")
-	Print("App name: ")
-	PrintlnPrompt(answers.Name)
-	Print("App path: ")
-	PrintlnPrompt(answers.Path)
-	PrintlnInfo("----------------")
+	RecapWorkspace(answers)
+	RecapKafka(answers)
+	PrintlnInfo("")
+}
+
+func generateApp(answers Answers) error {
+	count := 10
+	bar := pb.StartNew(count)
+	bar.ShowCounters = false
+
+	err := GenerateWorkspace(bar, answers.Path)
+	if err != nil {
+		return err
+	}
+
+	err = GenerateKafka(bar, answers)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

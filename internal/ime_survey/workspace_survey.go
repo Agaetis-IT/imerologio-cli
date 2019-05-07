@@ -10,6 +10,20 @@ import (
 	"path/filepath"
 )
 
+func AskBeginGeneration(launchGeneration *bool) error {
+	answer := false
+	err := survey.AskOne(&survey.Confirm{Message: "Begin generation?"}, &answer, nil)
+	if err != nil {
+		return err
+	}
+	*launchGeneration = answer
+	return nil
+}
+
+func AskAppName(answers *Answers) error {
+	return survey.AskOne(&survey.Input{Message: "App name:"}, &answers.Name, survey.Required)
+}
+
 func AskAppPath(answers *Answers) error {
 	questions := []*survey.Question{
 		{
