@@ -24,7 +24,7 @@ func main() {
 		return
 	}
 
-	err = AskKafkaNamespace(&answers)
+	err = AskKafka(&answers)
 	if err != nil {
 		PrintlnError(err.Error())
 		return

@@ -5,7 +5,7 @@ import (
 	"gopkg.in/AlecAivazis/survey.v1"
 )
 
-func AskKafkaNamespace(answers *Answers) error {
+func AskKafka(answers *Answers) error {
 	questions := []*survey.Question{
 		{
 			Name:      "KafkaOperatorNamespace",
