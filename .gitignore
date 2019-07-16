@@ -16,3 +16,6 @@ imerologio-cli
 # IntelliJ
 .idea/
 *.iml
+
+# VS Code
+.vscode/
