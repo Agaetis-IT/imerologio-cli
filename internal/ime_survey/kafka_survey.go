@@ -1,11 +1,11 @@
 package ime_survey
 
 import (
-	. "../../pkg/ime_types"
-	"gopkg.in/AlecAivazis/survey.v1"
+	"github.com/Agaetis-IT/imerologio-cli/pkg/ime_types"
+	"github.com/AlecAivazis/survey/v2"
 )
 
-func AskKafka(answers *Answers) error {
+func AskKafka(answers *ime_types.Answers) error {
 	questions := []*survey.Question{
 		{
 			Name:      "KafkaOperatorNamespace",

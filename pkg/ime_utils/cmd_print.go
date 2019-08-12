@@ -2,7 +2,8 @@ package ime_utils
 
 import (
 	"fmt"
-	"github.com/fatih/color"
+
+	"github.com/zchee/color/v2"
 )
 
 func Print(message string) {

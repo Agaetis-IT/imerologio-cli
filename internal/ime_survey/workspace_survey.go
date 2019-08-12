@@ -1,18 +1,20 @@
 package ime_survey
 
 import (
-	. "../../pkg/ime_types"
-	. "../../pkg/ime_utils"
 	"errors"
-	"gopkg.in/AlecAivazis/survey.v1"
 	"os"
 	"os/user"
 	"path/filepath"
+
+	"github.com/Agaetis-IT/imerologio-cli/pkg/ime_types"
+	"github.com/Agaetis-IT/imerologio-cli/pkg/ime_utils"
+
+	"github.com/AlecAivazis/survey/v2"
 )
 
 func AskBeginGeneration(launchGeneration *bool) error {
 	answer := false
-	err := survey.AskOne(&survey.Confirm{Message: "Begin generation?"}, &answer, nil)
+	err := survey.AskOne(&survey.Confirm{Message: "Begin generation?"}, &answer)
 	if err != nil {
 		return err
 	}
@@ -20,11 +22,11 @@ func AskBeginGeneration(launchGeneration *bool) error {
 	return nil
 }
 
-func AskAppName(answers *Answers) error {
-	return survey.AskOne(&survey.Input{Message: "App name:"}, &answers.Name, survey.Required)
+func AskAppName(answers *ime_types.Answers) error {
+	return survey.AskOne(&survey.Input{Message: "App name:"}, &answers.Name, survey.WithValidator(survey.Required))
 }
 
-func AskAppPath(answers *Answers) error {
+func AskAppPath(answers *ime_types.Answers) error {
 	questions := []*survey.Question{
 		{
 			Name:      "path",
@@ -39,7 +41,7 @@ func AskAppPath(answers *Answers) error {
 func suggestAppPath(appName string) string {
 	usr, err := user.Current()
 	if err != nil {
-		PrintlnError("Error while retrieving user's home directory")
+		ime_utils.PrintlnError("Error while retrieving user's home directory")
 	}
 	return filepath.Join(usr.HomeDir, appName)
 }

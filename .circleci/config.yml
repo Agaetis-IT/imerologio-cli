@@ -2,12 +2,9 @@ version: 2
 jobs:
   release:
     docker:
-      - image: circleci/golang:1.11
+      - image: circleci/golang:1.12
     steps:
       - checkout
-      - run: go get gopkg.in/AlecAivazis/survey.v1
-      - run: go get github.com/fatih/color
-      - run: go get gopkg.in/cheggaaa/pb.v1
       - run: curl -sL https://git.io/goreleaser | bash
 workflows:
   version: 2
