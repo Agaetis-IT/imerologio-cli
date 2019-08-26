@@ -1,21 +1,22 @@
 package ime_generate
 
 import (
-	. "../../pkg/ime_types"
-	. "../../pkg/ime_utils"
-	"gopkg.in/cheggaaa/pb.v1"
 	"io"
 	"io/ioutil"
 	"net/http"
 	"os"
 	"path/filepath"
 	"strconv"
+
+	"github.com/Agaetis-IT/imerologio-cli/pkg/ime_types"
+	"github.com/Agaetis-IT/imerologio-cli/pkg/ime_utils"
+	"github.com/cheggaaa/pb/v3"
 )
 
 const STRIMZI_VERSION = "0.11.1"
 const STRIMZI_URL = "https://github.com/strimzi/strimzi-kafka-operator/releases/download/" + STRIMZI_VERSION + "/strimzi-" + STRIMZI_VERSION + ".zip"
 
-func GenerateKafka(bar *pb.ProgressBar, answers Answers) error {
+func GenerateKafka(bar *pb.ProgressBar, answers ime_types.Answers) error {
 	workspacePath := answers.Path
 	eventStorePath := workspacePath + "/event-store"
 	strimziPath := eventStorePath + "/strimzi-" + STRIMZI_VERSION
@@ -77,7 +78,7 @@ func getStrimzi(bar *pb.ProgressBar, workspacePath string, strimziPath string) e
 	bar.Increment()
 
 	// Extract zip archive
-	_, err = Unzip(strimziZipPath, strimziPath)
+	_, err = ime_utils.Unzip(strimziZipPath, strimziPath)
 	if err != nil {
 		return err
 	}
@@ -119,7 +120,7 @@ func replaceNamespaceInRoleBindings(namespace string, bar *pb.ProgressBar) func(
 		}
 
 		if matched {
-			err = ReplaceInFile(path, "namespace: myproject", "namespace: "+namespace)
+			err = ime_utils.ReplaceInFile(path, "namespace: myproject", "namespace: "+namespace)
 			if err != nil {
 				return nil
 			}
@@ -157,7 +158,7 @@ func replaceClusterNameInKafkaExamples(clusterName string, bar *pb.ProgressBar) 
 		}
 
 		if matched {
-			err = ReplaceInFile(path, "my-cluster", clusterName)
+			err = ime_utils.ReplaceInFile(path, "my-cluster", clusterName)
 			if err != nil {
 				return nil
 			}
@@ -169,19 +170,19 @@ func replaceClusterNameInKafkaExamples(clusterName string, bar *pb.ProgressBar) 
 }
 
 func customizeTopic(bar *pb.ProgressBar, strimziPath string, topic string, clusterName string) error {
-	err := CopyFile(strimziPath+"/examples/topic/kafka-topic.yaml", strimziPath+"/examples/topic/kafka-topic-"+topic+".yaml")
+	err := ime_utils.CopyFile(strimziPath+"/examples/topic/kafka-topic.yaml", strimziPath+"/examples/topic/kafka-topic-"+topic+".yaml")
 	if err != nil {
 		return err
 	}
 	bar.Increment()
 
-	err = ReplaceInFile(strimziPath+"/examples/topic/kafka-topic-"+topic+".yaml", "my-topic", topic)
+	err = ime_utils.ReplaceInFile(strimziPath+"/examples/topic/kafka-topic-"+topic+".yaml", "my-topic", topic)
 	if err != nil {
 		return err
 	}
 	bar.Increment()
 
-	err = ReplaceInFile(strimziPath+"/examples/topic/kafka-topic-"+topic+".yaml", "my-cluster", clusterName)
+	err = ime_utils.ReplaceInFile(strimziPath+"/examples/topic/kafka-topic-"+topic+".yaml", "my-cluster", clusterName)
 	if err != nil {
 		return err
 	}
@@ -190,7 +191,7 @@ func customizeTopic(bar *pb.ProgressBar, strimziPath string, topic string, clust
 	return nil
 }
 
-func initializeDeploymentScript(bar *pb.ProgressBar, eventStorePath string, strimziPath string, answers Answers) error {
+func initializeDeploymentScript(bar *pb.ProgressBar, eventStorePath string, strimziPath string, answers ime_types.Answers) error {
 	scriptName := eventStorePath + "/deploy_event_store.sh"
 	script := "#!/bin/bash\n"
 	script += "set -xe\n\n"
@@ -223,29 +224,29 @@ func initializeDeploymentScript(bar *pb.ProgressBar, eventStorePath string, stri
 	return nil
 }
 
-func RecapKafka(answers Answers) {
-	PrintlnInfo("-- Kafka")
-	PrintlnInfo("--- Operator")
-	Print("Namespace: ")
-	PrintlnPrompt(answers.KafkaOperatorNamespace)
-	PrintlnInfo("--- Cluster")
-	Print("Name: ")
-	PrintlnPrompt(answers.KafkaClusterName)
-	Print("Namespace: ")
-	PrintlnPrompt(answers.KafkaClusterNamespace)
-	Print("Persistence: ")
-	PrintlnPrompt(strconv.FormatBool(answers.KafkaClusterPersistenceEnabled))
+func RecapKafka(answers ime_types.Answers) {
+	ime_utils.PrintlnInfo("-- Kafka")
+	ime_utils.PrintlnInfo("--- Operator")
+	ime_utils.Print("Namespace: ")
+	ime_utils.PrintlnPrompt(answers.KafkaOperatorNamespace)
+	ime_utils.PrintlnInfo("--- Cluster")
+	ime_utils.Print("Name: ")
+	ime_utils.PrintlnPrompt(answers.KafkaClusterName)
+	ime_utils.Print("Namespace: ")
+	ime_utils.PrintlnPrompt(answers.KafkaClusterNamespace)
+	ime_utils.Print("Persistence: ")
+	ime_utils.PrintlnPrompt(strconv.FormatBool(answers.KafkaClusterPersistenceEnabled))
 	topics := getTopics(answers.KafkaTopics)
 	if len(topics) > 0 {
-		Println("Topics: ")
+		ime_utils.Println("Topics: ")
 		for _, topic := range topics {
-			PrintlnPrompt("  - " + topic)
+			ime_utils.PrintlnPrompt("  - " + topic)
 		}
 	} else {
-		Println("Topics: no topics")
+		ime_utils.Println("Topics: no topics")
 	}
 }
 
 func getTopics(topicsAsString string) []string {
-	return Split(topicsAsString, ',')
+	return ime_utils.Split(topicsAsString, ',')
 }

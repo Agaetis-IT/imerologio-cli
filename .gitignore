@@ -19,3 +19,6 @@ imerologio-cli
 
 # VS Code
 .vscode/
+
+# Go releaser
+/dist

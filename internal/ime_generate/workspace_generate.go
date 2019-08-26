@@ -1,10 +1,11 @@
 package ime_generate
 
 import (
-	. "../../pkg/ime_types"
-	. "../../pkg/ime_utils"
-	"gopkg.in/cheggaaa/pb.v1"
 	"os"
+
+	"github.com/Agaetis-IT/imerologio-cli/pkg/ime_types"
+	"github.com/Agaetis-IT/imerologio-cli/pkg/ime_utils"
+	"github.com/cheggaaa/pb/v3"
 )
 
 func GenerateWorkspace(bar *pb.ProgressBar, path string) error {
@@ -16,10 +17,10 @@ func GenerateWorkspace(bar *pb.ProgressBar, path string) error {
 	return nil
 }
 
-func RecapWorkspace(answers Answers) {
-	PrintlnInfo("-- General")
-	Print("App name: ")
-	PrintlnPrompt(answers.Name)
-	Print("App path: ")
-	PrintlnPrompt(answers.Path)
+func RecapWorkspace(answers ime_types.Answers) {
+	ime_utils.PrintlnInfo("-- General")
+	ime_utils.Print("App name: ")
+	ime_utils.PrintlnPrompt(answers.Name)
+	ime_utils.Print("App path: ")
+	ime_utils.PrintlnPrompt(answers.Path)
 }
