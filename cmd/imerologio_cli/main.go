@@ -59,7 +59,7 @@ func showRecap(answers ime_types.Answers) {
 }
 
 func generateApp(answers ime_types.Answers) error {
-	count := 10
+	count := 11
 	bar := pb.Simple.Start(count)
 	bar.SetTemplateString(`{{string . "prefix"}}{{bar . }} {{percent . }}{{string . "suffix"}}`)
 
@@ -69,6 +69,11 @@ func generateApp(answers ime_types.Answers) error {
 	}
 
 	err = ime_generate.GenerateKafka(bar, answers)
+	if err != nil {
+		return err
+	}
+
+	err = ime_generate.GenerateManifest(bar, answers)
 	if err != nil {
 		return err
 	}

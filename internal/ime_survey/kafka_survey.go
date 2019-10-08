@@ -31,6 +31,7 @@ func AskKafka(answers *ime_types.Answers) error {
 			Prompt: &survey.Input{Message: "Kafka Topics - topics separated by comma (optional):"},
 		},
 	}
+	answers.KafkaQuestions = questions
 	return survey.Ask(questions, answers)
 }
 
