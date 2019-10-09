@@ -11,24 +11,22 @@ import (
 )
 
 type manifestReader struct {
-	answers        ime_types.Answers
+	answers        *ime_types.Answers
 	strimziVersion string
 }
 
-func dumpQuestionParameters(answers ime_types.Answers, questions []*survey.Question, initialString string) string {
-	result := initialString
+func dumpQuestionParameters(answers ime_types.Answers, questions []*survey.Question, result *string) {
 	value := reflect.ValueOf(answers)
 
 	for _, q := range questions {
 		field := value.FieldByName(q.Name)
 		switch field.Type().String() {
 		case "bool":
-			result += q.Name + ": " + strconv.FormatBool(field.Bool()) + "\n"
+			*result += q.Name + ": " + strconv.FormatBool(field.Bool()) + "\n"
 		default:
-			result += q.Name + ": " + field.String() + "\n"
+			*result += q.Name + ": " + field.String() + "\n"
 		}
 	}
-	return result
 }
 
 func dumpToFile(manifest manifestReader) []byte {
@@ -36,10 +34,10 @@ func dumpToFile(manifest manifestReader) []byte {
 
 	//Dump Workspace info
 	// go over every question
-	result = dumpQuestionParameters(manifest.answers, manifest.answers.WorkspaceQuestions, result)
+	dumpQuestionParameters(*manifest.answers, manifest.answers.WorkspaceQuestions, &result)
 
 	//Dump Kafka information
-	result = dumpQuestionParameters(manifest.answers, manifest.answers.KafkaQuestions, result)
+	dumpQuestionParameters(*manifest.answers, manifest.answers.KafkaQuestions, &result)
 
 	result += "Strimzi Version: " + STRIMZI_VERSION + "\n"
 	result += "Strimzi Url: " + STRIMZI_URL + "\n"
@@ -48,7 +46,7 @@ func dumpToFile(manifest manifestReader) []byte {
 }
 
 // GenerateManifest file to dump the elements used and created
-func GenerateManifest(bar *pb.ProgressBar, answers ime_types.Answers) error {
+func GenerateManifest(bar *pb.ProgressBar, answers *ime_types.Answers) error {
 	var manifestReader manifestReader
 	manifestReader.answers = answers
 	manifestReader.strimziVersion = STRIMZI_VERSION

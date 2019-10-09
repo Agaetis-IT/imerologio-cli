@@ -73,7 +73,7 @@ func generateApp(answers ime_types.Answers) error {
 		return err
 	}
 
-	err = ime_generate.GenerateManifest(bar, answers)
+	err = ime_generate.GenerateManifest(bar, &answers)
 	if err != nil {
 		return err
 	}
