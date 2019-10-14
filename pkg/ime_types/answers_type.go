@@ -1,5 +1,9 @@
 package ime_types
 
+import (
+	"github.com/AlecAivazis/survey/v2"
+)
+
 type Answers struct {
 	Name                           string
 	Path                           string
@@ -8,4 +12,7 @@ type Answers struct {
 	KafkaClusterNamespace          string
 	KafkaClusterPersistenceEnabled bool
 	KafkaTopics                    string
+
+	KafkaQuestions     []*survey.Question
+	WorkspaceQuestions []*survey.Question
 }

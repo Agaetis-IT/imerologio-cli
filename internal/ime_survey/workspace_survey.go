@@ -29,12 +29,13 @@ func AskAppName(answers *ime_types.Answers) error {
 func AskAppPath(answers *ime_types.Answers) error {
 	questions := []*survey.Question{
 		{
-			Name:      "path",
+			Name:      "Path",
 			Prompt:    &survey.Input{Message: "App path [" + suggestAppPath(answers.Name) + "]:"},
 			Validate:  validateAppPath(answers.Name),
 			Transform: transformAppPath(answers.Name),
 		},
 	}
+	answers.WorkspaceQuestions = questions
 	return survey.Ask(questions, answers)
 }
 
