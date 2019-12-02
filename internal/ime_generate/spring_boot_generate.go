@@ -6,12 +6,12 @@ import (
 	"os"
 	"strings"
 
-	. "../../pkg/ime_types"
-	. "../../pkg/ime_utils"
-	"gopkg.in/cheggaaa/pb.v1"
+	"github.com/Agaetis-IT/imerologio-cli/pkg/ime_types"
+	"github.com/Agaetis-IT/imerologio-cli/pkg/ime_utils"
+	"github.com/cheggaaa/pb/v3"
 )
 
-func GenerateSpringBoot(bar *pb.ProgressBar, answers Answers) error {
+func GenerateSpringBoot(bar *pb.ProgressBar, answers ime_types.Answers) error {
 	workspacePath := answers.Path
 	appPath := workspacePath + "/app"
 
@@ -29,7 +29,7 @@ func GenerateSpringBoot(bar *pb.ProgressBar, answers Answers) error {
 	return nil
 }
 
-func getStarter(bar *pb.ProgressBar, appPath string, answers Answers) error {
+func getStarter(bar *pb.ProgressBar, appPath string, answers ime_types.Answers) error {
 	starterZipPath := appPath + "/starter.zip"
 
 	body := strings.NewReader(`dependencies=web,actuator&language=java&type=maven-project&baseDir=` + answers.Name)
@@ -62,7 +62,7 @@ func getStarter(bar *pb.ProgressBar, appPath string, answers Answers) error {
 	bar.Increment()
 
 	// Extract zip archive
-	_, err = Unzip(starterZipPath, appPath)
+	_, err = ime_utils.Unzip(starterZipPath, appPath)
 	if err != nil {
 		return err
 	}
